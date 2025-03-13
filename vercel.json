@@ -1,6 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install"
+  "builds": [
+    { "src": "api/*.py", "use": "@vercel/python" },
+    { "src": "package.json", "use": "@vercel/next" }
+  ],
+  "routes": [{ "src": "/api/py/(.*)", "dest": "/api/$1" }]
 }

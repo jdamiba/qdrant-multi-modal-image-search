@@ -1336,6 +1336,401 @@ _**Assistant**_
 
 
 
+I'll update the README.md file in the repository to be relevant to this project.
+
+````markdown:README.md
+# Qdrant House Image Search
+
+A powerful application for searching house images using natural language descriptions, powered by CLIP embeddings and Qdrant vector search.
+
+## Features
+
+- **Text-to-Image Search**: Describe the house you're looking for in natural language, and find visually similar properties.
+- **Multimodal Understanding**: The system understands both architectural styles and specific features like "Victorian house" or "kitchen with marble countertops".
+- **Vector Embeddings with CLIP**: Images are converted into vector embeddings that capture visual features, while text queries are converted to the same vector space.
+- **Semantic Search with Qdrant**: Find houses that match your description semantically, not just by keywords.
+
+## Architecture
+
+This application is split into two parts:
+1. **Frontend**: Next.js application for the user interface
+2. **Backend**: FastAPI service for handling embeddings and search
+
+## Technology Stack
+
+- **Frontend**: Next.js with TypeScript and Tailwind CSS
+- **Backend**: FastAPI (Python)
+- **Embeddings**: OpenAI's CLIP model for multimodal embeddings
+- **Vector Database**: Qdrant
+- **Image Processing**: PIL (Python Imaging Library)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- Python (v3.9+)
+- Qdrant instance (cloud or self-hosted)
+
+### Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+# Qdrant Configuration
+QDRANT_URL=localhost
+QDRANT_PORT=6333
+QDRANT_API_KEY=
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# Next.js Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/qdrant-house-search.git
+cd qdrant-house-search
+```
+
+2. Install frontend dependencies:
+```bash
+npm install
+```
+
+3. Install backend dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Application
+
+1. Place your house images in the `/images` folder.
+
+2. Process and embed the images:
+```bash
+cd api
+python embed_images.py
+```
+
+3. Start the FastAPI backend:
+```bash
+cd api
+uvicorn main:app --reload
+```
+
+4. In a separate terminal, start the Next.js frontend:
+```bash
+npm run dev
+```
+
+5. Open your browser and navigate to `http://localhost:3000`
+
+## Usage Examples
+
+- Search for architectural styles: "Victorian house", "Modern farmhouse", "Mid-century modern home"
+- Search for specific features: "House with red brick", "Home with large windows", "Kitchen with marble countertops"
+- Search for locations: "Beach house", "Mountain cabin", "Urban apartment"
+
+## API Documentation
+
+When running locally, the API documentation is available at `http://localhost:8000/docs`.
+
+## How It Works
+
+1. **Image Processing**: House images are processed using CLIP to generate vector embeddings that capture visual features.
+2. **Vector Storage**: These embeddings are stored in a Qdrant collection.
+3. **Query Processing**: When a user enters a text query, it's converted to the same vector space using CLIP.
+4. **Similarity Search**: Qdrant finds the most similar image vectors to the query vector.
+5. **Result Display**: The matching images are displayed to the user with similarity scores.
+
+## Troubleshooting
+
+### Common Issues
+
+- **Images not displaying**: Ensure image paths are correct and the images are accessible from the frontend
+- **Search returns no results**: Check that your Qdrant instance is properly configured and accessible
+- **Slow embedding process**: For large image datasets, consider using a GPU for faster processing
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- OpenAI for the CLIP model
+- Qdrant for the vector database
+- Next.js team for the frontend framework
+````
+
+---
+
+_**User**_
+
+when i deploy this project to vercel, I get a 404 error when i try to to make a request to the /search endpoint
+
+---
+
+_**Assistant**_
+
+
+
+The issue is with your Next.js configuration when deploying to Vercel. The current rewrites configuration in your `next.config.js` works locally but needs to be adjusted for Vercel deployment.
+
+Let's update your `next.config.js` file to handle both local development and Vercel deployment:
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  env: {
+    API_BASE_URL: process.env.API_BASE_URL || "https://danek-api.fly.dev",
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/py/:path*",
+        destination: process.env.NODE_ENV === "development" 
+          ? "http://127.0.0.1:8000/:path*"  // Local development
+          : process.env.API_BASE_URL + "/:path*",  // Production API URL
+      },
+    ];
+  },
+  // Add performance optimizations
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    domains: ["localhost", "your-production-domain.com"],  // Add your production domain
+    // Add this to allow unoptimized images (helpful for local development)
+    unoptimized: true,
+  },
+  // Cache API responses
+  httpAgentOptions: {
+    keepAlive: true,
+  },
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"],
+          }
+        : false,
+  },
+};
+
+module.exports = nextConfig;
+```
+
+For this to work properly on Vercel, you need to:
+
+1. Deploy your FastAPI backend separately (to a service like Fly.io, Heroku, or any other hosting provider)
+2. Set the `API_BASE_URL` environment variable in your Vercel project settings to point to your deployed FastAPI backend URL
+3. Make sure your FastAPI backend has CORS configured to accept requests from your Vercel domain
+
+In your FastAPI `main.py`, ensure your CORS middleware is configured properly:
+
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://your-vercel-app-domain.vercel.app", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+Replace `your-vercel-app-domain.vercel.app` with your actual Vercel domain.
+
+---
+
+_**User**_
+
+i don't want to deploy my api separately, i want to take advantage of vercel's python serverless functions
+
+---
+
+_**Assistant**_
+
+
+
+I understand you want to use Vercel's serverless functions for your Python API instead of deploying it separately. Let's restructure your project to work with Vercel's serverless functions approach.
+
+Here's how to adapt your project:
+
+## 1. First, let's create a Vercel-compatible API structure:
+
+Create an `api` directory at the root of your project (not inside the `app` directory) for Vercel's serverless functions:
+
+````python:api/search.py
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import parse_qs
+import json
+import os
+import torch
+import numpy as np
+from transformers import CLIPProcessor, CLIPModel
+from qdrant_client import QdrantClient
+from qdrant_client.http import models
+
+# Initialize CLIP model and processor
+model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+device = "cpu"  # Vercel functions don't have GPU
+model.to(device)
+
+# Initialize Qdrant client
+QDRANT_URL = os.environ.get("QDRANT_URL", "localhost")
+QDRANT_PORT = int(os.environ.get("QDRANT_PORT", 6333))
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", None)
+COLLECTION_NAME = "house_images"
+
+client = QdrantClient(url=QDRANT_URL, port=QDRANT_PORT, api_key=QDRANT_API_KEY)
+
+def get_text_embedding(text):
+    """Generate embedding for text query using CLIP"""
+    inputs = processor(text=text, return_tensors="pt", padding=True).to(device)
+    
+    with torch.no_grad():
+        text_features = model.get_text_features(**inputs)
+        
+    # Normalize the features
+    text_embedding = text_features.cpu().numpy()[0]
+    text_embedding = text_embedding / np.linalg.norm(text_embedding)
+    
+    return text_embedding
+
+def search_images(query_text, limit=10):
+    """Search for images similar to the query text"""
+    # Get embedding for the query text
+    query_embedding = get_text_embedding(query_text)
+    
+    # Search in Qdrant
+    search_results = client.search(
+        collection_name=COLLECTION_NAME,
+        query_vector=query_embedding.tolist(),
+        limit=limit
+    )
+    
+    # Format results
+    results = []
+    for result in search_results:
+        # Ensure the image path is correctly formatted
+        image_path = result.payload["image_path"]
+        # Remove any leading 'images/' if present to avoid duplication
+        if image_path.startswith('images/'):
+            image_path = image_path[7:]
+            
+        results.append({
+            "image_path": image_path,
+            "filename": result.payload["filename"],
+            "score": result.score
+        })
+    
+    return results
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        
+        # Parse query parameters
+        query_params = parse_qs(self.path.split('?')[1]) if '?' in self.path else {}
+        query_text = query_params.get('query', [''])[0]
+        limit = int(query_params.get('limit', ['10'])[0])
+        
+        if not query_text:
+            self.wfile.write(json.dumps({"error": "Query parameter is required"}).encode())
+            return
+        
+        try:
+            results = search_images(query_text, limit)
+            self.wfile.write(json.dumps({"results": results}).encode())
+        except Exception as e:
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
+        
+        return
+
+def lambda_handler(event, context):
+    """AWS Lambda compatible handler"""
+    return {
+        'statusCode': 200,
+        'body': json.dumps(search_images(
+            event.get('queryStringParameters', {}).get('query', ''),
+            int(event.get('queryStringParameters', {}).get('limit', 10))
+        ))
+    }
+````
+
+## 2. Create a `vercel.json` file at the root of your project:
+
+````json:vercel.json
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/*.py", "use": "@vercel/python" },
+    { "src": "package.json", "use": "@vercel/next" }
+  ],
+  "routes": [
+    { "src": "/api/py/(.*)", "dest": "/api/$1" }
+  ]
+}
+````
+
+## 3. Update your `ImageSearch.tsx` component to use the correct endpoint:
+
+````typescript:app/components/ImageSearch.tsx
+// ... existing code ...
+
+const handleSearch = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (!query.trim()) {
+    setError('Please enter a search query');
+    return;
+  }
+  
+  setLoading(true);
+  setError('');
+  
+  try {
+    // This will work both locally and on Vercel
+    const response = await fetch(`/api/py/search?query=${encodeURIComponent(query)}&limit=20`);
+    
+    if (!response.ok) {
+      throw new Error('Search failed. Please try again.');
+    }
+    
+    const data = await response.json();
+    setResults(data.results);
+  } catch (err) {
+    console.error('Search error:', err);
+    setError('An error occurred while searching. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// ... rest of the component ...
+````
+
+## 4. Create a `requirements.txt` file in the `api` directory:
+
+````text:api/requirements.txt
+torch==2.0.1
+transformers==4.30.2
+qdrant-client==1.3
+
 ---
 
 
