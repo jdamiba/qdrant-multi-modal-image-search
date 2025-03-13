@@ -1,150 +1,127 @@
-# Qdrant Mistral OCR
+# Qdrant House Image Search
 
-A powerful application for uploading, processing, and searching handwritten notes and reference materials using AI, powered by FastEmbed & Mistral OCR.
+A powerful application for searching house images using natural language descriptions, powered by CLIP embeddings and Qdrant vector search.
 
 ## Features
 
-- **Smart Text Extraction**: Upload PDFs or images of your handwritten notes and reference documents. Both PDFs and images are processed using Mistral's OCR API for accurate text extraction.
-- **Embeddings with FastEmbed**: The extracted text is converted into vector embeddings that capture semantic meaning, enabling rich content matching.
-- **Smart Search with Qdrant**: Search across your documents and notes, or filter by document type to find exactly what you need through semantic search.
-- **Similar Document Search**: Find documents similar to any note or reference document with a single click.
-- **Search by Image**: Upload an image directly in the search bar to find related content.
+- **Text-to-Image Search**: Describe the house you're looking for in natural language, and find visually similar properties.
+- **Multimodal Understanding**: The system understands both architectural styles and specific features like "Victorian house" or "kitchen with marble countertops".
+- **Vector Embeddings with CLIP**: Images are converted into vector embeddings that capture visual features, while text queries are converted to the same vector space.
+- **Semantic Search with Qdrant**: Find houses that match your description semantically, not just by keywords.
 
 ## Architecture
 
 This application is split into two parts:
-1. **Frontend**: Next.js application deployed on Vercel
-2. **Backend**: FastAPI service deployed on Fly.io
 
-## Document Classification
-
-The application distinguishes between two types of documents:
-
-- **Handwritten Notes**: Your personal notes, class notes, meeting notes, to-do lists, and other handwritten content.
-- **Reference Documents**: Textbooks, articles, research papers, and other reference materials you want to search against.
+1. **Frontend**: Next.js application for the user interface
+2. **Backend**: FastAPI service for handling embeddings and search
 
 ## Technology Stack
 
 - **Frontend**: Next.js with TypeScript and Tailwind CSS
 - **Backend**: FastAPI (Python)
-- **OCR**: Mistral OCR API
-- **Embeddings**: FastEmbed with BAAI/bge-base-en model
+- **Embeddings**: OpenAI's CLIP model for multimodal embeddings
 - **Vector Database**: Qdrant
-- **Deployment**: Vercel (frontend) and Fly.io (backend)
+- **Image Processing**: PIL (Python Imaging Library)
 
-## Deployment Guide
-
-### Backend Deployment (Fly.io)
-
-1. Install the Fly CLI: https://fly.io/docs/hands-on/install-flyctl/
-
-2. Login to Fly.io:
-```bash
-fly auth login
-```
-
-3. Launch the app (first time only):
-```bash
-fly launch
-```
-
-4. Set up secrets for your API keys:
-```bash
-fly secrets set MISTRAL_API_KEY=your_mistral_api_key
-fly secrets set QDRANT_URL=your_qdrant_cloud_url
-fly secrets set QDRANT_API_KEY=your_qdrant_api_key
-fly secrets set COLLECTION_NAME=notes
-```
-
-5. Deploy the app:
-```bash
-fly deploy
-```
-
-### Frontend Deployment (Vercel)
-
-1. Set environment variables on Vercel:
-   - `API_BASE_URL`: Your Fly.io app URL (e.g., https://your-app.fly.dev)
-
-2. Deploy to Vercel:
-```bash
-vercel
-```
-
-## Local Development
+## Getting Started
 
 ### Prerequisites
 
 - Node.js (v18+)
 - Python (v3.9+)
-- Mistral API key
-- Qdrant account (cloud or self-hosted)
+- Qdrant instance (cloud or self-hosted)
 
 ### Environment Variables
 
 Create a `.env` file in the root directory with the following variables:
 
 ```
-# Backend
-MISTRAL_API_KEY=your_mistral_api_key
-QDRANT_URL=your_qdrant_url
-QDRANT_API_KEY=your_qdrant_api_key
-COLLECTION_NAME=notes
+# Qdrant Configuration
+QDRANT_URL=localhost
+QDRANT_PORT=6333
+QDRANT_API_KEY=
 
-# Frontend (for local development)
-API_BASE_URL=http://localhost:8080
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# Next.js Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
-git clone https://github.com/thierrypdamiba/qdrant-mistral-ocr.git
-cd qdrant-mistral-ocr
+git clone https://github.com/yourusername/qdrant-house-search.git
+cd qdrant-house-search
 ```
 
 2. Install frontend dependencies:
+
 ```bash
 npm install
 ```
 
 3. Install backend dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Running the Application
 
-1. Start the FastAPI backend:
+1. Place your house images in the `/images` folder.
+
+2. Process and embed the images:
+
 ```bash
-python -m uvicorn api.index:app --reload --port 8080
+cd api
+python embed_images.py
 ```
 
-2. In a separate terminal, start the Next.js frontend:
+3. Start the FastAPI backend:
+
+```bash
+cd api
+uvicorn main:app --reload
+```
+
+4. In a separate terminal, start the Next.js frontend:
+
 ```bash
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:3000`
+5. Open your browser and navigate to `http://localhost:3000`
+
+## Usage Examples
+
+- Search for architectural styles: "Victorian house", "Modern farmhouse", "Mid-century modern home"
+- Search for specific features: "House with red brick", "Home with large windows", "Kitchen with marble countertops"
+- Search for locations: "Beach house", "Mountain cabin", "Urban apartment"
 
 ## API Documentation
 
-When running locally, the API documentation is available at `http://localhost:8080/docs`.
+When running locally, the API documentation is available at `http://localhost:8000/docs`.
 
-## Recent Updates
+## How It Works
 
-- **April 2025**: Added support for PDF processing using Mistral's OCR API
-- **March 2025**: Updated OCR processing to use Mistral OCR API instead of the deprecated Document API
-- **March 2025**: Improved UI for upload success and error messages
-- **March 2025**: Added better error handling for file uploads
+1. **Image Processing**: House images are processed using CLIP to generate vector embeddings that capture visual features.
+2. **Vector Storage**: These embeddings are stored in a Qdrant collection.
+3. **Query Processing**: When a user enters a text query, it's converted to the same vector space using CLIP.
+4. **Similarity Search**: Qdrant finds the most similar image vectors to the query vector.
+5. **Result Display**: The matching images are displayed to the user with similarity scores.
 
 ## Troubleshooting
 
 ### Common Issues
 
-- **Upload fails**: Ensure your Mistral API key is valid and has sufficient credits
+- **Images not displaying**: Ensure image paths are correct and the images are accessible from the frontend
 - **Search returns no results**: Check that your Qdrant instance is properly configured and accessible
-- **OCR quality issues**: For best results, ensure images are clear and well-lit
+- **Slow embedding process**: For large image datasets, consider using a GPU for faster processing
 
 ## License
 
@@ -152,7 +129,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgements
 
-- Mistral AI for their OCR API
-- FastEmbed for the embedding model
+- OpenAI for the CLIP model
 - Qdrant for the vector database
 - Next.js team for the frontend framework
