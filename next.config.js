@@ -7,7 +7,10 @@ const nextConfig = {
     return [
       {
         source: "/api/py/:path*",
-        destination: "http://localhost:8000/:path*", // Proxy to Python FastAPI backend
+        destination:
+          process.env.NODE_ENV === "development"
+            ? "http://127.0.0.1:8000/api/py/:path*"
+            : "/api/",
       },
     ];
   },
