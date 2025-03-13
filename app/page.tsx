@@ -41,10 +41,10 @@ export default function Home() {
             </h2>
             <div className="max-w-3xl mx-auto mb-4">
               <p className="text-sm text-gray-600 italic">
-                Find your dream home by describing what you're looking for —
-                from Victorian architecture to modern interiors, our AI-powered
-                search understands your preferences and finds visually similar
-                properties.
+                Find your dream home by describing what you&apos;re looking for
+                — from Victorian architecture to modern interiors, our
+                AI-powered search understands your preferences and finds
+                visually similar properties.
               </p>
             </div>
             <p className="max-w-4xl mx-auto text-md text-gray-600">
@@ -131,7 +131,7 @@ export default function Home() {
                 </p>
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <span className="text-sm text-amaranth">
-                    Using OpenAI's CLIP technology
+                    Using OpenAI&apos;s CLIP technology
                   </span>
                 </div>
               </div>
@@ -195,9 +195,10 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-gray-600 mb-4">
-                Try searching for specific architectural styles like "Victorian
-                house", "Modern farmhouse", "Mid-century modern home", or
-                "Mediterranean villa".
+                Try searching for specific architectural styles like
+                &quot;Victorian house&quot;, &quot;Modern farmhouse&quot;,
+                &quot;Mid-century modern home&quot;, or &quot;Mediterranean
+                villa&quot;.
               </p>
               <span className="badge badge-amaranth inline-flex px-2 py-1 text-xs font-medium rounded-md">
                 Style
@@ -225,9 +226,10 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-gray-600 mb-4">
-                Search for specific features like "house with red brick", "home
-                with large windows", "house with swimming pool", or "kitchen
-                with marble countertops".
+                Search for specific features like &quot;house with red
+                brick&quot;, &quot;home with large windows&quot;, &quot;house
+                with swimming pool&quot;, or &quot;kitchen with marble
+                countertops&quot;.
               </p>
               <span className="badge badge-amaranth inline-flex px-2 py-1 text-xs font-medium rounded-md">
                 Features
